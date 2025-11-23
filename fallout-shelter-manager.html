@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gestionnaire professionnel pour votre abri Fallout Shelter - Gérez vos résidents, salles, ressources et généalogie">
+    <meta name="keywords" content="Fallout Shelter, gestionnaire, abri, Vault-Tec, résidents, généalogie">
+    <meta name="author" content="Vault-Tec Corporation">
+    <meta name="theme-color" content="#ffd700">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Vault-Tec Shelter Manager Pro">
+    <meta property="og:description" content="Gestionnaire professionnel d'abri Fallout Shelter">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏛️</text></svg>">
+    
+    <title>🏛️ Vault-Tec Shelter Manager Pro | Gestionnaire Fallout Shelter</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0e27; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="font-size: 4em; animation: pulse 2s ease-in-out infinite;">🏛️</div>
+        <div style="color: #ffd700; font-family: 'Courier New', monospace; font-size: 1.5em; margin-top: 20px; animation: glowPulse 2s ease-in-out infinite;">VAULT-TEC</div>
+        <div style="color: #64b5f6; font-family: 'Courier New', monospace; margin-top: 10px;">Chargement du système...</div>
+    </div>
+
+    <div class="container" style="opacity: 0; transition: opacity 0.5s;">
+        <!-- Header -->
+        <header class="header" role="banner">
+            <div style="position: relative;">
+                <h1>
+                    <span style="display: inline-block; animation: float 3s ease-in-out infinite;">🏛️</span>
+                    VAULT-TEC
+                </h1>
+                <p>Gestionnaire d'Abri Fallout Shelter Pro</p>
+                <div class="vault-info">
+                    <input 
+                        type="text" 
+                        id="vault-name" 
+                        placeholder="Nom de votre abri" 
+                        value="Mon Abri"
+                        maxlength="50"
+                        aria-label="Nom de l'abri"
+                        title="Entrez le nom de votre abri"
+                    >
+                    <button class="btn btn-secondary" onclick="saveVaultName()" aria-label="Sauvegarder le nom de l'abri">
+                        💾 Sauvegarder
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Stats Dashboard -->
+        <section class="stats-grid" role="region" aria-label="Statistiques de l'abri">
+            <article class="stat-card blue" title="Nombre total de résidents">
+                <div class="stat-icon" aria-hidden="true">👥</div>
+                <div class="stat-info">
+                    <div class="label">Résidents</div>
+                    <div class="value" id="stat-residents" aria-live="polite">0</div>
+                </div>
+            </article>
+            <article class="stat-card green" title="Niveau moyen des résidents">
+                <div class="stat-icon" aria-hidden="true">🎯</div>
+                <div class="stat-info">
+                    <div class="label">Niveau Moy.</div>
+                    <div class="value" id="stat-level" aria-live="polite">0</div>
+                </div>
+            </article>
+            <article class="stat-card red" title="Bonheur moyen des résidents">
+                <div class="stat-icon" aria-hidden="true">❤️</div>
+                <div class="stat-info">
+                    <div class="label">Bonheur Moy.</div>
+                    <div class="value" id="stat-happiness" aria-live="polite">0%</div>
+                </div>
+            </article>
+            <article class="stat-card pink" title="Nombre d'enfants">
+                <div class="stat-icon" aria-hidden="true">👶</div>
+                <div class="stat-info">
+                    <div class="label">Enfants</div>
+                    <div class="value" id="stat-children" aria-live="polite">0</div>
+                </div>
+            </article>
+            <article class="stat-card yellow" title="Résidents sans emploi">
+                <div class="stat-icon" aria-hidden="true">⚠️</div>
+                <div class="stat-info">
+                    <div class="label">Sans emploi</div>
+                    <div class="value" id="stat-unemployed" aria-live="polite">0</div>
+                </div>
+            </article>
+            <article class="stat-card purple" title="Nombre total de salles">
+                <div class="stat-icon" aria-hidden="true">🏠</div>
+                <div class="stat-info">
+                    <div class="label">Salles</div>
+                    <div class="value" id="stat-rooms" aria-live="polite">0</div>
+                </div>
+            </article>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs" role="tablist" aria-label="Navigation principale">
+            <button class="tab active" role="tab" aria-selected="true" aria-controls="residents-tab" onclick="switchTab('residents')">
+                <span aria-hidden="true">👥</span> Résidents
+            </button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="rooms-tab" onclick="switchTab('rooms')">
+                <span aria-hidden="true">🏠</span> Salles
+            </button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="genealogy-tab" onclick="switchTab('genealogy')">
+                <span aria-hidden="true">🌳</span> Généalogie
+            </button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="resources-tab" onclick="switchTab('resources')">
+                <span aria-hidden="true">📦</span> Ressources
+            </button>
+            <button class="tab" role="tab" aria-selected="false" aria-controls="events-tab" onclick="switchTab('events')">
+                <span aria-hidden="true">⚡</span> Événements
+            </button>
+        </nav>
+
+        <!-- Residents Tab -->
+        <section id="residents-tab" class="tab-content active" role="tabpanel" aria-labelledby="residents-tab">
+            <div class="controls">
+                <input 
+                    type="search" 
+                    id="search-resident" 
+                    placeholder="🔍 Rechercher un résident..." 
+                    oninput="filterResidents()"
+                    aria-label="Rechercher un résident"
+                >
+                <select id="filter-job" onchange="filterResidents()" aria-label="Filtrer par emploi">
+                    <option value="all">Tous les emplois</option>
+                    <option value="unemployed">Sans emploi</option>
+                    <option value="power">⚡ Électricité</option>
+                    <option value="water">💧 Eau</option>
+                    <option value="food">🍽️ Nourriture</option>
+                    <option value="medbay">❤️ Infirmerie</option>
+                    <option value="science">🧪 Science</option>
+                    <option value="training">💪 Entraînement</option>
+                    <option value="exploring">🗺️ Exploration</option>
+                    <option value="guard">🛡️ Garde</option>
+                </select>
+                <select id="sort-residents" onchange="filterResidents()" aria-label="Trier les résidents">
+                    <option value="name">📝 Trier par nom</option>
+                    <option value="level">🎯 Trier par niveau</option>
+                    <option value="happiness">❤️ Trier par bonheur</option>
+                    <option value="recent">🕐 Plus récent</option>
+                </select>
+                <button class="btn btn-primary" onclick="showAddResidentModal()" aria-label="Ajouter un nouveau résident">
+                    ➕ Ajouter Résident
+                </button>
+                <button class="btn btn-secondary" onclick="exportJSON()" aria-label="Exporter les données">
+                    💾 Exporter
+                </button>
+                <button class="btn btn-secondary" onclick="document.getElementById('import-json').click()" aria-label="Importer des données">
+                    📁 Importer
+                </button>
+                <input type="file" id="import-json" accept=".json" style="display:none" onchange="importJSON(event)" aria-label="Fichier d'importation">
+            </div>
+
+            <!-- Resident Modal -->
+            <dialog id="resident-modal" class="modal" aria-labelledby="resident-modal-title">
+                <h3 id="resident-modal-title">Nouveau Résident</h3>
+                <form onsubmit="event.preventDefault(); saveResident();">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="resident-name">Nom <span style="color: #f44336;">*</span></label>
+                            <input type="text" id="resident-name" required aria-required="true" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-gender">Genre <span style="color: #f44336;">*</span></label>
+                            <select id="resident-gender" required aria-required="true">
+                                <option value="male">👨 Homme</option>
+                                <option value="female">👩 Femme</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-age">Âge</label>
+                            <input type="number" id="resident-age" value="25" min="1" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-level">Niveau</label>
+                            <input type="number" id="resident-level" value="1" min="1" max="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-health">Santé (HP)</label>
+                            <input type="number" id="resident-health" value="100" min="0" max="200">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-happiness">Bonheur (%)</label>
+                            <input type="number" id="resident-happiness" value="50" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-job">Emploi</label>
+                            <select id="resident-job">
+                                <option value="unemployed">Sans emploi</option>
+                                <option value="power">⚡ Électricité</option>
+                                <option value="water">💧 Eau</option>
+                                <option value="food">🍽️ Nourriture</option>
+                                <option value="medbay">❤️ Infirmerie</option>
+                                <option value="science">🧪 Science</option>
+                                <option value="training">💪 Entraînement</option>
+                                <option value="exploring">🗺️ Exploration</option>
+                                <option value="guard">🛡️ Garde</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-room">Salle assignée</label>
+                            <select id="resident-room">
+                                <option value="">Aucune salle</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-outfit">Tenue</label>
+                            <input type="text" id="resident-outfit" value="Vault Suit" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-weapon">Arme</label>
+                            <input type="text" id="resident-weapon" value="Aucune" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="resident-weapon-damage">Dégâts arme</label>
+                            <input type="number" id="resident-weapon-damage" value="0" min="0" max="999">
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="resident-pregnant" aria-label="Résident enceinte">
+                            <label for="resident-pregnant">Enceinte 👶</label>
+                        </div>
+                    </div>
+
+                    <div class="special-stats">
+                        <h4>
+                            <span style="color: #ffd700;">S.P.E.C.I.A.L.</span> Stats
+                        </h4>
+                        <div class="special-grid">
+                            <div class="form-group">
+                                <label for="stat-strength">💪 Force (S)</label>
+                                <input type="number" id="stat-strength" value="1" min="1" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stat-perception">👁️ Perception (P)</label>
+                                <input type="number" id="stat-perception" value="1" min="1" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stat-endurance">🏃 Endurance (E)</label>
+                                <input type="number" id="stat-endurance" value="1" min="1" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stat-charisma">💬 Charisme (C)</label>
+                                <input type="number" id="stat-charisma" value="1" min="1" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stat-intelligence">🧠 Intelligence (I)</label>
+                                <input type="number" id="stat-intelligence" value="1" min="1" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stat-agility">⚡ Agilité (A)</label>
+                                <input type="number" id="stat-agility" value="1" min="1" max="10">
+                            </div>
+                            <div class="form-group">
+                                <label for="stat-luck">🍀 Chance (L)</label>
+                                <input type="number" id="stat-luck" value="1" min="1" max="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resident-notes">📝 Notes</label>
+                        <textarea id="resident-notes" rows="3" maxlength="500" placeholder="Ajoutez des notes sur ce résident..."></textarea>
+                    </div>
+
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn btn-primary">💾 Sauvegarder</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeResidentModal()">❌ Annuler</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <div id="residents-list" class="cards-grid" role="list" aria-label="Liste des résidents"></div>
+        </section>
+
+        <!-- Rooms Tab -->
+        <section id="rooms-tab" class="tab-content" role="tabpanel" aria-labelledby="rooms-tab">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showAddRoomModal()">
+                    ➕ Ajouter Salle
+                </button>
+                <select id="filter-room-type" onchange="filterRooms()" aria-label="Filtrer par type de salle">
+                    <option value="all">Tous les types</option>
+                    <option value="power">⚡ Centrale électrique</option>
+                    <option value="water">💧 Traitement eau</option>
+                    <option value="food">🍽️ Restaurant</option>
+                    <option value="medbay">❤️ Infirmerie</option>
+                    <option value="science">🧪 Laboratoire</option>
+                    <option value="training">💪 Entraînement</option>
+                    <option value="living">🛏️ Quartiers</option>
+                    <option value="storage">📦 Stockage</option>
+                </select>
+            </div>
+
+            <dialog id="room-modal" class="modal" aria-labelledby="room-modal-title">
+                <h3 id="room-modal-title">Nouvelle Salle</h3>
+                <form onsubmit="event.preventDefault(); saveRoom();">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="room-name">Nom de la salle <span style="color: #f44336;">*</span></label>
+                            <input type="text" id="room-name" required aria-required="true" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="room-type">Type</label>
+                            <select id="room-type">
+                                <option value="power">⚡ Centrale électrique</option>
+                                <option value="water">💧 Traitement eau</option>
+                                <option value="food">🍽️ Restaurant</option>
+                                <option value="medbay">❤️ Infirmerie</option>
+                                <option value="science">🧪 Laboratoire</option>
+                                <option value="training">💪 Entraînement</option>
+                                <option value="living">🛏️ Quartiers</option>
+                                <option value="storage">📦 Stockage</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="room-level">Niveau</label>
+                            <input type="number" id="room-level" value="1" min="1" max="3">
+                        </div>
+                        <div class="form-group">
+                            <label for="room-max-workers">Travailleurs max</label>
+                            <input type="number" id="room-max-workers" value="2" min="1" max="6">
+                        </div>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn btn-primary">💾 Sauvegarder</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeRoomModal()">❌ Annuler</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <div id="rooms-list" class="cards-grid" role="list" aria-label="Liste des salles"></div>
+        </section>
+
+        <!-- Genealogy Tab -->
+        <section id="genealogy-tab" class="tab-content" role="tabpanel" aria-labelledby="genealogy-tab">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showAddChildModal()">
+                    👶 Créer un Enfant
+                </button>
+            </div>
+
+            <div class="modal" id="selection-panel" style="display: block; margin-bottom: 20px;">
+                <h3>👥 Sélection des Parents</h3>
+                <p style="color: #9e9e9e; margin-bottom: 20px;">
+                    Sélectionnez un homme et une femme pour créer un enfant
+                </p>
+                
+                <div class="form-grid" style="margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="select-father">👨 Père (Homme)</label>
+                        <select id="select-father" onchange="updateParentSelection()">
+                            <option value="">Sélectionner...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="select-mother">👩 Mère (Femme)</label>
+                        <select id="select-mother" onchange="updateParentSelection()">
+                            <option value="">Sélectionner...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="parents-preview" style="display: none;">
+                    <div style="background: rgba(76, 175, 80, 0.2); border: 2px solid #4caf50; border-radius: 10px; padding: 15px; animation: fadeIn 0.5s;">
+                        <div style="text-align: center; margin-bottom: 10px;">
+                            <span style="font-size: 1.5em;" aria-hidden="true">💑</span>
+                            <div style="color: #4caf50; font-weight: bold;">Parents sélectionnés !</div>
+                        </div>
+                        <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                            <div id="father-info"></div>
+                            <div id="mother-info"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <dialog id="add-child-modal" class="modal" aria-labelledby="add-child-title">
+                <h3 id="add-child-title">👶 Créer un Nouvel Enfant</h3>
+                <p style="color: #9e9e9e; margin-bottom: 20px;">
+                    Parents: <span id="child-parents-display" style="color: #ffd700;"></span>
+                </p>
+                
+                <form onsubmit="event.preventDefault(); createChild();">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="child-name">Nom de l'enfant <span style="color: #f44336;">*</span></label>
+                            <input type="text" id="child-name" required aria-required="true" maxlength="50">
+                        </div>
+                        <div class="form-group">
+                            <label for="child-gender">Genre</label>
+                            <select id="child-gender">
+                                <option value="male">👦 Garçon</option>
+                                <option value="female">👧 Fille</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn btn-primary">✨ Créer l'enfant</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddChildModal()">❌ Annuler</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <div id="genealogy-display" role="region" aria-label="Arbre généalogique"></div>
+        </section>
+
+        <!-- Resources Tab -->
+        <section id="resources-tab" class="tab-content" role="tabpanel" aria-labelledby="resources-tab">
+            <div class="resources-container">
+                <h3>📦 Gestion des Ressources</h3>
+                <form onsubmit="event.preventDefault(); saveResources();">
+                    <div class="resources-grid">
+                        <div class="resource-card">
+                            <div class="resource-icon" aria-hidden="true">⚡</div>
+                            <div class="resource-name">Électricité</div>
+                            <input type="number" id="resource-power" value="100" min="0" max="999" aria-label="Électricité">
+                            <div class="resource-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                <div class="resource-fill power" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon" aria-hidden="true">💧</div>
+                            <div class="resource-name">Eau</div>
+                            <input type="number" id="resource-water" value="100" min="0" max="999" aria-label="Eau">
+                            <div class="resource-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                <div class="resource-fill water" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon" aria-hidden="true">🍽️</div>
+                            <div class="resource-name">Nourriture</div>
+                            <input type="number" id="resource-food" value="100" min="0" max="999" aria-label="Nourriture">
+                            <div class="resource-bar" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                <div class="resource-fill food" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon" aria-hidden="true">💰</div>
+                            <div class="resource-name">Capsules</div>
+                            <input type="number" id="resource-caps" value="500" min="0" max="999999" aria-label="Capsules">
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon" aria-hidden="true">⚛️</div>
+                            <div class="resource-name">Rad-X</div>
+                            <input type="number" id="resource-radx" value="10" min="0" max="999" aria-label="Rad-X">
+                        </div>
+                        <div class="resource-card">
+                            <div class="resource-icon" aria-hidden="true">💊</div>
+                            <div class="resource-name">Stimpacks</div>
+                            <input type="number" id="resource-stim" value="20" min="0" max="999" aria-label="Stimpacks">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 30px; width: 100%; padding: 18px; font-size: 1.2em;">
+                        💾 Sauvegarder Ressources
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Events Tab -->
+        <section id="events-tab" class="tab-content" role="tabpanel" aria-labelledby="events-tab">
+            <div class="controls">
+                <button class="btn btn-primary" onclick="showAddEventModal()">
+                    ➕ Ajouter Événement
+                </button>
+            </div>
+
+            <dialog id="event-modal" class="modal" aria-labelledby="event-modal-title">
+                <h3 id="event-modal-title">⚡ Nouvel Événement</h3>
+                <form onsubmit="event.preventDefault(); saveEvent();">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="event-type">Type d'événement</label>
+                            <select id="event-type">
+                                <option value="incident">🔥 Incident (Feu, Radcafards...)</option>
+                                <option value="attack">⚔️ Attaque (Raiders, Deathclaws...)</option>
+                                <option value="birth">👶 Naissance</option>
+                                <option value="death">💀 Décès</option>
+                                <option value="level-up">⬆️ Montée de niveau</option>
+                                <option value="exploration">🗺️ Retour d'exploration</option>
+                                <option value="custom">📝 Personnalisé</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="event-description">Description</label>
+                            <textarea id="event-description" rows="3" maxlength="500" placeholder="Décrivez l'événement..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-resident">Résident concerné (optionnel)</label>
+                            <select id="event-resident">
+                                <option value="">Aucun</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn btn-primary">✨ Enregistrer</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeEventModal()">❌ Annuler</button>
+                    </div>
+                </form>
+            </dialog>
+
+            <div id="events-timeline" role="feed" aria-label="Timeline des événements"></div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="text-align: center; padding: 40px 20px; margin-top: 60px; border-top: 2px solid rgba(100, 181, 246, 0.3); color: #9e9e9e; font-size: 0.9em;">
+            <div style="margin-bottom: 15px; font-size: 2em;" aria-hidden="true">🏛️</div>
+            <div style="color: #ffd700; font-weight: bold; margin-bottom: 10px;">VAULT-TEC CORPORATION</div>
+            <div style="margin-bottom: 10px;">Gestionnaire Fallout Shelter Pro v2.0</div>
+            <div style="font-size: 0.85em;">
+                Développé avec ❤️ pour les Overseer | 
+                <a href="#" style="color: #64b5f6; text-decoration: none;" onclick="alert('Fallout Shelter Manager Pro\n\nVersion 2.0.0\n\nFonctionnalités:\n✅ Gestion des résidents\n✅ Gestion des salles\n✅ Arbre généalogique\n✅ Gestion des ressources\n✅ Timeline des événements\n✅ Import/Export JSON\n\nDéveloppé pour gérer efficacement votre abri Vault-Tec'); return false;">À propos</a> | 
+                <a href="#" style="color: #64b5f6; text-decoration: none;" onclick="if(confirm('Êtes-vous sûr de vouloir réinitialiser toutes les données ?')) { localStorage.clear(); location.reload(); }; return false;">Réinitialiser</a>
+            </div>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(100, 181, 246, 0.2); font-size: 0.8em; color: #616161;">
+                💡 Astuce: Utilisez les fonctions d'export/import pour sauvegarder vos données
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px;" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="script.js"></script>
+    <script>
+        // Loading screen
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loading-screen').style.opacity = '0';
+                document.querySelector('.container').style.opacity = '1';
+                setTimeout(function() {
+                    document.getElementById('loading-screen').style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Toast notification system
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: { bg: '#4caf50', icon: '✅' },
+                error: { bg: '#f44336', icon: '❌' },
+                warning: { bg: '#ff9800', icon: '⚠️' },
+                info: { bg: '#2196f3', icon: 'ℹ️' }
+            };
+            
+            const style = colors[type] || colors.info;
+            
+            toast.style.cssText = `
+                background: ${style.bg};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideInRight 0.3s ease;
+                min-width: 250px;
+                max-width: 400px;
+            `;
+            
+            toast.innerHTML = `
+                <span style="font-size: 1.2em;">${style.icon}</span>
+                <span style="flex: 1;">${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2em; padding: 0; opacity: 0.7; transition: opacity 0.3s;" title="Fermer">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S pour sauvegarder
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveData();
+                showToast('Données sauvegardées !', 'success');
+            }
+            
+            // Ctrl/Cmd + E pour exporter
+            if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+                e.preventDefault();
+                exportJSON();
+            }
+            
+            // Échap pour fermer les modals
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.show').forEach(modal => {
+                    modal.classList.remove('show');
+                });
+            }
+        });
+
+        // Auto-save every 2 minutes
+        setInterval(function() {
+            saveData();
+            console.log('Auto-save effectué:', new Date().toLocaleTimeString());
+        }, 120000);
+
+        // Confirmation before leaving if data exists
+        window.addEventListener('beforeunload', function(e) {
+            const hasData = localStorage.getItem('fallout-residents') || 
+                           localStorage.getItem('fallout-rooms') || 
+                           localStorage.getItem('fallout-events');
+            
+            if (hasData) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Service Worker for offline support (optional)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Uncomment to enable offline mode
+                // navigator.serviceWorker.register('/sw.js');
+            });
+        }
+
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            console.log('Mode sombre détecté');
+        }
+
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            const perfData = window.performance.timing;
+            const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart;
+            console.log('⚡ Temps de chargement:', pageLoadTime + 'ms');
+        });
+
+        // Accessibility: Skip to content
+        const skipLink = document.createElement('a');
+        skipLink.href = '#residents-tab';
+        skipLink.textContent = 'Aller au contenu principal';
+        skipLink.style.cssText = `
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: #2196f3;
+            color: white;
+            padding: 8px;
+            text-decoration: none;
+            z-index: 100;
+        `;
+        skipLink.addEventListener('focus', function() {
+            this.style.top = '0';
+        });
+        skipLink.addEventListener('blur', function() {
+            this.style.top = '-40px';
+        });
+        document.body.insertBefore(skipLink, document.body.firstChild);
+
+        // Print handler
+        window.addEventListener('beforeprint', function() {
+            document.body.classList.add('printing');
+        });
+        
+        window.addEventListener('afterprint', function() {
+            document.body.classList.remove('printing');
+        });
+
+        // Enhanced error handling
+        window.addEventListener('error', function(e) {
+            console.error('Erreur globale:', e.error);
+            showToast('Une erreur est survenue. Veuillez actualiser la page.', 'error');
+        });
+
+        // Detect if running standalone (PWA)
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            console.log('📱 Application lancée en mode standalone (PWA)');
+        }
+
+        // Analytics placeholder (add your analytics code here)
+        function trackEvent(category, action, label) {
+            console.log('📊 Event:', category, action, label);
+            // Example: gtag('event', action, { 'event_category': category, 'event_label': label });
+        }
+
+        // Help/Tutorial system
+        function showHelp() {
+            const helpText = `
+🏛️ AIDE - VAULT-TEC SHELTER MANAGER
+
+📋 RÉSIDENTS:
+• Cliquez sur "➕ Ajouter Résident" pour créer un nouveau résident
+• Remplissez les informations et les stats S.P.E.C.I.A.L.
+• Utilisez les filtres pour rechercher et trier
+
+🏠 SALLES:
+• Créez des salles pour assigner vos résidents
+• Chaque salle a un niveau et une capacité
+
+🌳 GÉNÉALOGIE:
+• Sélectionnez un père et une mère
+• Créez des enfants qui hériteront des traits
+• Visualisez l'arbre généalogique par génération
+
+📦 RESSOURCES:
+• Gérez l'électricité, l'eau, la nourriture
+• Suivez vos capsules et objets
+
+⚡ ÉVÉNEMENTS:
+• Enregistrez tous les événements importants
+• Timeline chronologique automatique
+
+💾 SAUVEGARDE:
+• Auto-sauvegarde toutes les 2 minutes
+• Exportez en JSON pour backup
+• Ctrl+S pour sauvegarder manuellement
+
+⌨️ RACCOURCIS:
+• Ctrl+S : Sauvegarder
+• Ctrl+E : Exporter
+• Échap : Fermer les modals
+            `;
+            alert(helpText);
+        }
+
+        // Add help button
+        const helpButton = document.createElement('button');
+        helpButton.innerHTML = '❓';
+        helpButton.title = 'Aide';
+        helpButton.className = 'btn btn-secondary';
+        helpButton.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        `;
+        helpButton.onclick = showHelp;
+        document.body.appendChild(helpButton);
+
+        // Check for updates (placeholder)
+        function checkForUpdates() {
+            // Add your update checking logic here
+            console.log('🔍 Vérification des mises à jour...');
+        }
+
+        // Initialize
+        console.log(`
+        ╔══════════════════════════════════════╗
+        ║   🏛️  VAULT-TEC SHELTER MANAGER     ║
+        ║         Version 2.0.0 Pro           ║
+        ╠══════════════════════════════════════╣
+        ║  ✅ Système initialisé              ║
+        ║  ✅ Modules chargés                 ║
+        ║  ✅ Prêt à l'emploi                 ║
+        ╚══════════════════════════════════════╝
+        `);
+
+        // Welcome message for first time users
+        setTimeout(function() {
+            if (!localStorage.getItem('fallout-visited')) {
+                showToast('👋 Bienvenue sur Vault-Tec Shelter Manager !', 'info');
+                localStorage.setItem('fallout-visited', 'true');
+                setTimeout(() => {
+                    if (confirm('Voulez-vous voir le guide de démarrage rapide ?')) {
+                        showHelp();
+                    }
+                }, 2000);
+            }
+        }, 1500);
+    </script>
+
+    <style>
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            #loading-screen,
+            #toast-container,
+            .controls,
+            .tabs,
+            button,
+            #helpButton {
+                display: none !important;
+            }
+            
+            .container {
+                max-width: 100% !important;
+            }
+            
+            .card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+
+        /* Enhanced focus states for accessibility */
+        *:focus-visible {
+            outline: 3px solid #2196f3 !important;
+            outline-offset: 2px !important;
+        }
+
+        /* Smooth scroll behavior */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Selection styling */
+        ::selection {
+            background: rgba(33, 150, 243, 0.5);
+            color: #fff;
+        }
+    </style>
+</body>
+</html>
